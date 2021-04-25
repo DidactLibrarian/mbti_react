@@ -37,7 +37,7 @@ class TestResult extends React.Component {
     }
 
     let RESULT = EI + SN + TF + JP;
-
+    console.log(RESULT);
     const { data } = await axios.get(`/api/result.php?result=${RESULT}`);
 
     console.log(data[0]);
@@ -67,6 +67,7 @@ class TestResult extends React.Component {
         <div className="text-center mt-5">
           당신의 히어로 메이트는 <h2>{data.title}</h2>
         </div>
+        <div className="text-center mt-5">{data.explains2}</div>
         <div className="text-center mt-5">{data.explains}</div>
       </section>
     );
