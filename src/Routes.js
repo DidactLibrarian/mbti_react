@@ -1,12 +1,14 @@
-//TESTPAGE
-const testReady = "/"; //HOME
-const testProcess = "/process"; //PROCESS
-const testResult = "/result"; //RESULT
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { TestReady, TestProcess, TestResult } from './pages';
 
-const routes = {
-  TESTREADY: testReady,
-  TESTPROCESS: testProcess,
-  TESTRESULT: testResult,
+const Routes = function () {
+  return (
+    <Router>
+      <Route exact path="/" component={TestReady} />
+      <Route path="/process" component={TestProcess} />
+      <Route path="/result" component={TestResult} />
+    </Router>
+  );
 };
 
-export default routes;
+export default Routes;

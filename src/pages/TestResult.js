@@ -52,6 +52,8 @@ class TestResult extends React.Component {
   };
   componentDidMount() {
     this.mbti();
+    const resultData = window.localStorage.getItem('resultData');
+    // 여기서부터는 직접 구현해보셈!!!!!
   }
   render() {
     const { data } = this.state;

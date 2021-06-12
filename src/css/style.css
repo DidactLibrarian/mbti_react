@@ -1,4 +1,4 @@
-.backgroun-images {
+.index-wrapper {
   position: absolute;
   top: 0;
   left: 0;
@@ -12,6 +12,7 @@
     ),
     url(../images/home_background.jpg);
   background-size: cover;
+  background-position: center;
 }
 
 h1 {

@@ -1,134 +1,80 @@
-import React from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
-import { Button, ProgressBar } from "react-bootstrap";
+import React from 'react';
+import axios from 'axios';
+import { Button, ProgressBar } from 'react-bootstrap';
 
 class TestProcess extends React.Component {
   state = {
-    progress: 0,
-    data: "",
-    paramsId: 1,
-    result: false,
-    elements: "",
+    data: {},
+    processStep: 1,
     EI: 0,
     SN: 0,
     TF: 0,
     JP: 0,
   };
 
-  mbtiUp = async () => {
-    let { paramsId, elements, EI, SN, TF, JP } = this.state;
+  mbtiUp = () => {
+    const { processStep, data } = this.state;
 
-    let elementsUse = elements;
+    const elementsUse = data[processStep - 1].elements;
 
-    if (elementsUse === "EI") {
-      EI += 1;
-    } else if (elementsUse === "SN") {
-      SN += 1;
-    } else if (elementsUse === "TF") {
-      TF += 1;
-    } else if (elementsUse === "JP") {
-      JP += 1;
-    }
+    let elementsCount = {};
+    elementsCount[elementsUse] = this.state[elementsUse] + 1;
 
-    const { data } = await axios.get(`/api/index.php?seq=${paramsId}`);
-    let progress = (100 / 12) * paramsId;
-    let dataJson = data[0];
-    let result = false;
-    if (progress >= 100) {
-      result = true;
-    }
-
-    this.setState({
-      data: dataJson,
-      progress,
-      elements: dataJson.elements,
-      paramsId: paramsId + 1,
-      result,
-      EI,
-      SN,
-      TF,
-      JP,
-    });
+    this.setState((prevState) => ({
+      ...prevState,
+      processStep: prevState.processStep + 1,
+      ...elementsCount,
+    }));
   };
 
-  mbtiDown = async () => {
-    const { paramsId } = this.state;
-    const { data } = await axios.get(`/api/index.php?seq=${paramsId}`);
-    let progress = (100 / 12) * paramsId;
-    let dataJson = data[0];
-    let result = false;
-    if (progress >= 100) {
-      result = true;
-    }
-    this.setState({
-      data: dataJson,
-      progress,
-      elements: dataJson.elements,
-      paramsId: paramsId + 1,
-      result,
+  mbtiDown = () => {
+    this.setState((prevState) => ({
+      ...prevState,
+      processStep: prevState.processStep + 1,
+      result: prevState.processStep === prevState.data.length,
+    }));
+  };
+
+  fetchAPI = async () => {
+    const { data } = await axios.get(`/api/index.php`);
+
+    this.setState((prev) => {
+      return {
+        ...prev,
+        data: data,
+      };
     });
   };
 
   componentDidMount() {
-    this.mbtiDown();
+    this.fetchAPI();
   }
 
   render() {
-    const { data, progress, result, EI, SN, TF, JP } = this.state;
+    const { data, processStep } = this.state;
+    const totalQuestionCount = data.length;
+    const progress = (100 / totalQuestionCount) * processStep;
+    const result = processStep === totalQuestionCount;
+
+    if (result) {
+      window.localStorage.setItem('resultData', JSON.stringify(this.state));
+      this.props.history.push('/result');
+    }
+
     return (
       <article className="question container">
         <ProgressBar animated now={progress} />
         <h2 id="title" className="text-center mt-5">
           {data.title}
         </h2>
-        {result ? (
-          <>
-            <Link
-              to={{
-                pathname: "/result",
-                state: {
-                  mbti: {
-                    EI,
-                    SN,
-                    TF,
-                    JP: parseInt(JP + 1),
-                  },
-                },
-              }}
-            >
-              <Button className="prcbtn" variant="primary mt-5">
-                {data.question1}
-              </Button>
-            </Link>
-            <Link
-              to={{
-                pathname: "/result",
-                state: {
-                  mbti: {
-                    EI,
-                    SN,
-                    TF,
-                    JP,
-                  },
-                },
-              }}
-            >
-              <Button className="prcbtn" variant="primary mt-5">
-                {data.question2}
-              </Button>
-            </Link>
-          </>
-        ) : (
-          <>
-            <Button variant="primary mt-5" onClick={this.mbtiUp}>
-              {data.question1}
-            </Button>
-            <Button variant="primary mt-5" onClick={this.mbtiDown}>
-              {data.question2}
-            </Button>
-          </>
-        )}
+        <div className="questionButtons">
+          <Button variant="primary mt-5" onClick={this.mbtiUp}>
+            {data.question1}
+          </Button>
+          <Button variant="primary mt-5" onClick={this.mbtiDown}>
+            {data.question2}
+          </Button>
+        </div>
       </article>
     );
   }
